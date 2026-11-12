@@ -1,245 +1,230 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { BadgeCheck, ShieldCheck, Wallet, Camera, FileSignature, Search, CalendarCheck, ClipboardList, Hammer, ArrowRight, Check, X, Star } from 'lucide-react'
-import { CATEGORIES, CITIES, TUKANG, MITRA } from '../data'
-import { Icon, TukangCard, Avatar, Stars, DataContoh, useSession } from '../components/ui'
+import { Search, Check, X, Camera, Lock, Star, ChevronRight } from 'lucide-react'
+import { CATEGORIES, CITIES, TUKANG, MITRA, STATS, rupiah } from '../data'
+import { Icon, TukangCard, useSession } from '../components/ui'
+import { WorkArt } from '../components/art'
+
+const POPULER = [['Pipa bocor', 'ledeng'], ['Pasang keramik', 'bangunan'], ['Tambah titik lampu', 'listrik'], ['Cat ulang kamar', 'cat'], ['Kanopi carport', 'las'], ['Genteng bocor', 'atap']]
 
 export default function Home() {
   const nav = useNavigate()
   const { setRole } = useSession()
-  const [cat, setCat] = useState('')
-  const [city, setCity] = useState('')
   const [mode, setMode] = useState('harian')
-  const featured = [TUKANG[0], TUKANG[9], TUKANG[2], TUKANG[13]]
+  const [q, setQ] = useState('')
+  const [city, setCity] = useState('Bandung')
+  const featured = TUKANG.filter((t) => (t.city === 'Bandung' || t.city === 'Cimahi') && !CATEGORIES.find((c) => c.id === t.category).borongan).sort((a, b) => (b.readySoon - a.readySoon) || b.rating - a.rating).slice(0, 8)
 
-  const search = (e) => {
+  const submit = (e) => {
     e.preventDefault()
-    if (mode === 'borongan') return nav('/proyek/baru' + (city ? `?kota=${city}` : ''))
-    const q = new URLSearchParams()
-    if (cat) q.set('kategori', cat)
-    if (city) q.set('kota', city)
-    nav('/cari?' + q.toString())
+    if (mode === 'borongan') return nav(`/proyek/baru?kota=${city}`)
+    const p = new URLSearchParams({ kota: city })
+    const match = CATEGORIES.find((c) => q && (c.name.toLowerCase().includes(q.toLowerCase()) || q.toLowerCase().includes(c.short.toLowerCase())))
+    if (match) p.set('kategori', match.id); else if (q) p.set('q', q)
+    nav('/cari?' + p.toString())
   }
   const login = (r) => { setRole(r); nav(`/app/${r}`) }
 
   return (
     <main>
-      {/* HERO */}
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0 grid-paper opacity-40" />
-        <div className="relative max-w-6xl mx-auto px-4 pt-14 pb-16 grid lg:grid-cols-[1.15fr_.85fr] gap-10 items-center">
-          <div>
-            <span className="chip bg-ink text-white"><Hammer size={12} /> Marketplace tukang terverifikasi</span>
-            <h1 className="mt-4 text-5xl md:text-6xl font-extrabold leading-[1.02]">Tukang jelas orangnya. <span className="text-orange">Harga jelas</span> di depan.</h1>
-            <p className="mt-5 text-lg text-ink-2 max-w-xl">Tukang bangunan, kayu, listrik, ledeng, cat, dan las yang dokumennya kami periksa. Servis cepat harian atau borongan dengan RAB, dan uang Anda ditahan di escrow sampai pekerjaan beres.</p>
+      <section className="bg-soft border-b border-line">
+        <div className="max-w-[1200px] mx-auto px-4 md:px-6 pt-12 md:pt-[72px] pb-16 md:pb-20 flex flex-wrap gap-14 items-center">
+          <div className="flex-[999_1_560px] min-w-0">
+            <h1 className="text-[40px] md:text-[58px] leading-[1.04] font-extrabold tracking-[-0.035em] max-w-[14ch]">Tukang terverifikasi, uang aman sampai beres.</h1>
+            <p className="mt-5 text-lg md:text-[19px] leading-relaxed text-ink-2 max-w-[52ch]">Bangunan, kayu, listrik, ledeng, cat, dan las. Harga disepakati di depan, pembayaran ditahan TukangTikung dan baru cair setelah Anda setujui hasilnya.</p>
 
-            <form onSubmit={search} className="mt-7 card p-3 shadow-sm">
-              <div className="flex gap-1 p-1 bg-paper-2 rounded-lg w-fit mb-3 text-sm font-semibold">
-                <button type="button" onClick={() => setMode('harian')} className={`px-3 py-1.5 rounded-md ${mode === 'harian' ? 'bg-white shadow-sm' : 'text-muted'}`}>Panggil harian</button>
-                <button type="button" onClick={() => setMode('borongan')} className={`px-3 py-1.5 rounded-md ${mode === 'borongan' ? 'bg-white shadow-sm' : 'text-muted'}`}>Borongan / renovasi</button>
-              </div>
-              <div className="grid sm:grid-cols-[1fr_1fr_auto] gap-2">
-                {mode === 'harian' ? (
-                  <label className="text-xs font-semibold text-muted">Butuh tukang apa?
-                    <select className="input mt-1 text-ink" value={cat} onChange={(e) => setCat(e.target.value)}>
-                      <option value="">Semua tukang</option>
-                      {CATEGORIES.filter((c) => !c.borongan).map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-                    </select>
-                  </label>
-                ) : (
-                  <label className="text-xs font-semibold text-muted">Jenis proyek
-                    <select className="input mt-1 text-ink"><option>Renovasi dapur</option><option>Kamar mandi</option><option>Tambah kamar / lantai</option><option>Kanopi & pagar</option><option>Atap baja ringan</option></select>
-                  </label>
-                )}
-                <label className="text-xs font-semibold text-muted">Lokasi
-                  <select className="input mt-1 text-ink" value={city} onChange={(e) => setCity(e.target.value)}>
-                    <option value="">Semua kota</option>
-                    {CITIES.map((c) => <option key={c}>{c}</option>)}
-                  </select>
-                </label>
-                <button className="btn btn-primary self-end h-[42px]"><Search size={16} /> {mode === 'harian' ? 'Cari tukang' : 'Minta survei'}</button>
-              </div>
-            </form>
-            <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm text-ink-2">
-              <span className="flex items-center gap-1.5"><BadgeCheck size={16} className="text-green" /> KTP, SKCK & portofolio dicek</span>
-              <span className="flex items-center gap-1.5"><Wallet size={16} className="text-green" /> Dana aman di escrow</span>
-              <span className="flex items-center gap-1.5"><ShieldCheck size={16} className="text-green" /> Garansi & retensi 5%</span>
-            </div>
-          </div>
-
-          {/* hero visual */}
-          <div className="relative hidden lg:block">
-            <div className="card p-5 shadow-xl rotate-1">
-              <div className="flex items-center justify-between">
-                <div className="text-xs font-semibold text-muted">PROYEK P-2611-014</div><DataContoh />
-              </div>
-              <div className="font-display text-xl font-bold mt-1">Renovasi dapur + kitchen set</div>
-              <div className="text-sm text-muted">CV Karya Tikung Nusantara · Bandung</div>
-              <div className="mt-4 h-2.5 rounded-full bg-paper-2 overflow-hidden"><div className="h-full bg-orange" style={{ width: '55%' }} /></div>
-              <div className="flex justify-between text-xs mt-1 text-muted"><span>Progres 55%</span><span>Target 15 Des</span></div>
-              <div className="mt-4 space-y-2 text-sm">
-                {[['DP 30%', 'Cair', 'bg-green-l text-green'], ['Termin 2 · 40%', 'Menunggu Anda', 'bg-orange-l text-orange-d'], ['Termin 3 · 25%', 'Di escrow', 'bg-paper-2 text-muted'], ['Retensi 5%', 'Di escrow', 'bg-paper-2 text-muted']].map(([a, b, c]) => (
-                  <div key={a} className="flex justify-between items-center py-1.5 border-b border-line last:border-0"><span>{a}</span><span className={`chip ${c}`}>{b}</span></div>
+            <form onSubmit={submit} className="mt-8 bg-white border border-line-2 rounded-[20px] p-2.5 shadow-[0_12px_32px_-12px_rgba(23,25,28,.16)]">
+              <div role="tablist" aria-label="Jenis pekerjaan" className="flex gap-1 p-1 pb-2.5">
+                {[['harian', 'Panggil harian'], ['borongan', 'Borongan / renovasi']].map(([id, l]) => (
+                  <button key={id} type="button" role="tab" aria-selected={mode === id} onClick={() => setMode(id)} className={`px-4 py-2.5 rounded-[10px] text-[15px] font-bold min-h-[44px] ${mode === id ? 'bg-ink text-white' : 'text-ink-2 hover:bg-soft'}`}>{l}</button>
                 ))}
               </div>
-            </div>
-            <div className="card p-3 shadow-lg absolute -bottom-16 -left-10 w-64 -rotate-2 flex gap-3 items-center">
-              <div className="w-12 h-12 rounded-lg bg-paper-2 grid place-items-center"><Camera size={20} className="text-orange" /></div>
-              <div className="text-sm"><div className="font-semibold">Laporan progres baru</div><div className="text-muted text-xs">Kabinet bawah terpasang · 11 Nov</div></div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* KATEGORI */}
-      <section className="max-w-6xl mx-auto px-4 py-14">
-        <div className="flex items-end justify-between gap-4 flex-wrap">
-          <div>
-            <h2 className="text-3xl md:text-4xl font-bold">Pekerjaan apa yang mau dibereskan?</h2>
-            <p className="text-ink-2 mt-2">Kisaran tarif pasar, disepakati langsung dengan tukang atau mitra kontraktor sebelum mulai.</p>
-          </div>
-          <Link to="/cari" className="btn btn-ghost text-sm">Lihat semua tukang <ArrowRight size={16} /></Link>
-        </div>
-        <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-3">
-          {CATEGORIES.map((c) => (
-            <Link key={c.id} to={c.borongan ? '/proyek/baru' : `/cari?kategori=${c.id}`} className={`card p-4 hover:border-ink transition group ${c.borongan ? '!bg-ink text-white !border-ink' : ''}`}>
-              <div className={`w-11 h-11 rounded-xl grid place-items-center ${c.borongan ? 'bg-orange text-white' : 'bg-orange-l text-orange-d'}`}><Icon name={c.icon} size={22} /></div>
-              <div className="font-semibold mt-3">{c.name}</div>
-              <div className={`text-xs mt-1 ${c.borongan ? 'text-white/70' : 'text-muted'}`}>{c.desc}</div>
-              <div className="text-sm font-semibold mt-3">{c.price}</div>
-            </Link>
-          ))}
-        </div>
-        <p className="text-xs text-muted mt-3">Kisaran ilustrasi untuk demo, belum survei harga resmi. Harga akhir tergantung volume, material, dan lokasi.</p>
-      </section>
-
-      {/* CARA KERJA */}
-      <section id="cara-kerja" className="bg-ink text-white">
-        <div className="max-w-6xl mx-auto px-4 py-16">
-          <h2 className="text-3xl md:text-4xl font-bold">Dua jalur, satu prinsip: semua tercatat.</h2>
-          <p className="text-white/70 mt-2 max-w-2xl">Tidak ada janji lisan yang hilang. Lingkup kerja, harga, jadwal, dan tambahan biaya disetujui di aplikasi.</p>
-          <div className="mt-10 grid lg:grid-cols-2 gap-6">
-            {[
-              { title: 'Panggil harian', sub: 'Bocor, korslet, pasang rak, perbaikan kecil', steps: [
-                [Search, 'Pilih tukang', 'Saring kategori, kota, tarif, rating, dan jarak.'],
-                [CalendarCheck, 'Pesan jadwal', 'Tukang konfirmasi. Nomor HP tampil setelah itu.'],
-                [Wallet, 'Bayar ke escrow', 'Estimasi biaya ditahan TukangTikung, bukan ke rekening pribadi.'],
-                [Camera, 'Konfirmasi selesai', 'Foto sebelum/sesudah, dana cair, garansi 7–30 hari.'],
-              ] },
-              { title: 'Borongan / renovasi', sub: 'Dapur, kamar mandi, kanopi, tambah ruang', steps: [
-                [ClipboardList, 'Survei & RAB', 'Hingga 3 mitra survei lalu kirim RAB per item untuk dibandingkan.'],
-                [FileSignature, 'Kontrak digital', 'Lingkup, material, jadwal, dan termin tertulis dari templat.'],
-                [Camera, 'Termin per progres', 'Termin cair setelah laporan progres Anda setujui.'],
-                [ShieldCheck, 'Retensi garansi 5%', 'Ditahan 60–90 hari setelah serah terima untuk klaim.'],
-              ] },
-            ].map((j) => (
-              <div key={j.title} className="rounded-2xl border border-white/15 p-6 bg-white/[.03]">
-                <div className="font-display text-2xl font-bold">{j.title}</div>
-                <div className="text-white/60 text-sm">{j.sub}</div>
-                <ol className="mt-6 space-y-5">
-                  {j.steps.map(([I, a, b], i) => (
-                    <li key={a} className="flex gap-4">
-                      <div className="w-10 h-10 rounded-xl bg-orange grid place-items-center shrink-0"><I size={18} /></div>
-                      <div><div className="font-semibold"><span className="text-orange mr-1">{i + 1}.</span>{a}</div><div className="text-sm text-white/70">{b}</div></div>
-                    </li>
-                  ))}
-                </ol>
+              <div className="flex flex-wrap gap-2">
+                <label className="flex-[3_1_260px] flex flex-col gap-0.5 px-4 py-2.5 rounded-[14px] bg-soft">
+                  <span className="text-xs font-bold text-ink-2">{mode === 'harian' ? 'Butuh tukang apa?' : 'Proyek apa?'}</span>
+                  <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={mode === 'harian' ? 'mis. listrik, ledeng, keramik' : 'mis. renovasi dapur 12 m²'} className="bg-transparent text-[17px] font-medium outline-none py-0.5 placeholder:text-[#6B7280]" />
+                </label>
+                <label className="flex-[1_1_160px] flex flex-col gap-0.5 px-4 py-2.5 rounded-[14px] bg-soft">
+                  <span className="text-xs font-bold text-ink-2">Lokasi</span>
+                  <select value={city} onChange={(e) => setCity(e.target.value)} className="bg-transparent text-[17px] font-medium outline-none py-0.5">{CITIES.map((c) => <option key={c}>{c}</option>)}</select>
+                </label>
+                <button className="btn btn-primary flex-[0_1_auto] min-h-[60px] !px-7 text-base"><Search size={20} /> {mode === 'harian' ? 'Cari tukang' : 'Minta survei'}</button>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* SIAP KERJA */}
-      <section className="max-w-6xl mx-auto px-4 py-16">
-        <div className="flex items-end justify-between gap-4 flex-wrap">
-          <div>
-            <h2 className="text-3xl md:text-4xl font-bold">Siap kerja minggu ini</h2>
-            <p className="text-ink-2 mt-2">Dokumen sudah diperiksa tim TukangTikung. Nama di bawah adalah contoh. <DataContoh /></p>
-          </div>
-          <Link to="/cari" className="btn btn-ghost text-sm">Lihat {TUKANG.length} profil <ArrowRight size={16} /></Link>
-        </div>
-        <div className="mt-8 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">{featured.map((t) => <TukangCard key={t.id} t={t} />)}</div>
-      </section>
-
-      {/* KEJUJURAN */}
-      <section className="max-w-6xl mx-auto px-4 pb-16">
-        <div className="card p-8 md:p-10 grid lg:grid-cols-2 gap-10">
-          <div>
-            <h2 className="text-3xl font-bold">Kami perantara, dan kami jujur soal itu.</h2>
-            <p className="mt-3 text-ink-2">Kontrak kerja dibuat antara Anda dan tukang atau mitra kontraktor. Tugas TukangTikung menjaga pintunya: siapa yang boleh masuk, bagaimana uang disimpan, dan siapa yang dikeluarkan bila melanggar.</p>
-            <ul className="mt-6 space-y-3 text-sm">
-              {['Legalitas mitra diperiksa sebelum tayang: NIB, KBLI konstruksi, NPWP, dan deposit jaminan.', 'Dokumen tukang dicek: KTP, SKCK, foto wajah, portofolio; sertifikat SKK/BNSP jadi badge tambahan.', 'Uang ditahan di escrow dan cair per termin setelah progres disetujui.', 'Tambahan biaya wajib diajukan dan disetujui di aplikasi, bukan di lokasi.'].map((x) => (
-                <li key={x} className="flex gap-2"><Check size={18} className="text-green shrink-0 mt-0.5" />{x}</li>
-              ))}
-            </ul>
-          </div>
-          <div className="bg-paper-2 rounded-xl p-6">
-            <div className="font-semibold">Yang tidak kami lakukan</div>
-            <ul className="mt-4 space-y-3 text-sm">
-              {['Menjamin perilaku seseorang. Verifikasi adalah pemeriksaan dokumen.', 'Menampilkan NIK atau dokumen asli. Hanya statusnya (UU PDP).', 'Memungut biaya dari tukang mandiri untuk mendaftar.', 'Menerima pembayaran di luar aplikasi. Transfer pribadi tidak dilindungi.'].map((x) => (
-                <li key={x} className="flex gap-2"><X size={18} className="text-red shrink-0 mt-0.5" />{x}</li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      </section>
-
-      {/* MITRA */}
-      <section className="max-w-6xl mx-auto px-4 pb-16">
-        <h2 className="text-3xl font-bold">Mitra kontraktor terverifikasi</h2>
-        <p className="text-ink-2 mt-2">Contoh daftar. Nama perusahaan fiktif.</p>
-        <div className="mt-6 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {MITRA.map((m) => (
-            <div key={m.id} className="card p-4">
-              <div className="flex gap-3 items-center"><Avatar name={m.initials} tone="dark" size={42} /><div><div className="font-semibold text-sm leading-tight">{m.name}</div><div className="text-xs text-muted">{m.city} · {m.projects} proyek</div></div></div>
-              <div className="flex justify-between items-center mt-4 text-xs"><Stars value={m.rating} /><span className="text-muted">Tim {m.team} · KBLI {m.kbli}</span></div>
+            </form>
+            <div className="mt-5 flex flex-wrap gap-2 items-center">
+              <span className="text-sm text-ink-2 mr-1">Populer di Bandung:</span>
+              {POPULER.map(([l, c]) => <Link key={l} to={`/cari?kategori=${c}&kota=Bandung`} className="pill !min-h-[38px] !font-medium">{l}</Link>)}
+              <Link to="/proyek/baru" className="pill !min-h-[38px] !font-medium">Renovasi dapur</Link>
             </div>
-          ))}
+          </div>
+
+          <aside className="flex-[1_1_360px] min-w-0 max-w-[440px] bg-white border border-line rounded-[20px] p-6 shadow-[0_20px_48px_-20px_rgba(23,25,28,.22)]" aria-label="Contoh proyek dengan pembayaran per termin">
+            <div className="flex justify-between items-start gap-3">
+              <div><div className="text-[13px] text-muted">Contoh proyek · Cikutra, Bandung</div><div className="text-xl font-extrabold mt-0.5">Renovasi dapur + kitchen set</div></div>
+              <span className="chip bg-orange-l text-orange-d whitespace-nowrap">Berjalan</span>
+            </div>
+            <div className="mt-4 grid grid-cols-3 gap-2">
+              <WorkArt cat="bangunan" seed={0} showTag={false} rounded={10} />
+              <WorkArt cat="kayu" seed={3} showTag={false} rounded={10} />
+              <WorkArt cat="ledeng" seed={1} showTag={false} rounded={10} />
+            </div>
+            <div className="mt-4 h-2 bg-paper-2 rounded-full overflow-hidden"><div className="h-full bg-brand rounded-full" style={{ width: '55%' }} /></div>
+            <div className="flex justify-between text-[13px] text-muted mt-1.5"><span>Progres 55%</span><span>Target 15 Des</span></div>
+            <div className="mt-3 flex flex-col text-[15px]">
+              <div className="flex items-center gap-3 py-2.5 border-t border-paper-2"><span className="w-7 h-7 rounded-full bg-green-l text-green grid place-items-center"><Check size={16} /></span><span className="flex-1">DP · 30%</span><b>Rp 14,55 jt</b><span className="text-xs font-bold text-green w-[88px] text-right">Sudah cair</span></div>
+              <div className="flex items-center gap-3 py-2.5 px-3 -mx-3 rounded-xl bg-[#FFF6F0]"><span className="w-7 h-7 rounded-full bg-brand text-white grid place-items-center"><Camera size={15} /></span><span className="flex-1">Progres · 40%</span><b>Rp 19,4 jt</b><span className="text-xs font-bold text-orange-d w-[88px] text-right">Cek foto dulu</span></div>
+              <div className="flex items-center gap-3 py-2.5 border-b border-paper-2"><span className="w-7 h-7 rounded-full bg-paper-2 text-muted grid place-items-center"><Lock size={15} /></span><span className="flex-1">Sisa · 30%</span><b>Rp 14,55 jt</b><span className="text-xs font-bold text-muted w-[88px] text-right">Ditahan</span></div>
+            </div>
+            <p className="mt-3 text-[13px] leading-relaxed text-muted">Tukang mengunggah foto progres. Termin baru cair setelah Anda menyetujuinya.</p>
+          </aside>
         </div>
-        <p className="text-sm text-ink-2 mt-4">Garansi pekerjaan milik mitra. Bila sengketa buntu, TukangTikung memfasilitasi mediasi dan dapat memakai retensi atau deposit mitra untuk perbaikan.</p>
       </section>
 
-      {/* TESTIMONI + LOGIN */}
-      <section className="max-w-6xl mx-auto px-4 pb-6">
-        <div className="card p-8 text-center">
-          <div className="flex justify-center gap-0.5">{[...Array(5)].map((_, i) => <Star key={i} size={18} className="fill-orange text-orange" />)}</div>
-          <p className="font-display text-2xl md:text-3xl font-bold mt-3 max-w-3xl mx-auto">“Foto progres tiap hari, termin baru cair setelah saya cek. Pertama kali renovasi tanpa deg-degan.”</p>
-          <p className="text-sm text-muted mt-3">Pak Gilang, Cimahi · renovasi kamar mandi · testimoni contoh</p>
+      <section className="max-w-[1200px] mx-auto px-4 md:px-6 pt-16 md:pt-[72px]">
+        <div className="flex flex-wrap justify-between items-end gap-4">
+          <h2 className="text-[28px] md:text-[34px] font-extrabold">Pekerjaan apa yang mau dibereskan?</h2>
+          <Link to="/cari" className="text-[15px] font-bold text-orange hover:text-orange-d">Lihat semua {STATS.tukang} tukang</Link>
         </div>
+        <div className="mt-6 grid grid-cols-[repeat(auto-fit,minmax(270px,1fr))] border border-line rounded-2xl overflow-hidden">
+          {CATEGORIES.map((c) => {
+            const n = TUKANG.filter((t) => t.category === c.id).length
+            return (
+              <Link key={c.id} to={c.borongan ? '/proyek/baru' : `/cari?kategori=${c.id}`} className="flex items-center gap-3.5 px-5 py-[18px] border-b border-r border-paper-2 hover:bg-soft text-ink">
+                <span className={`w-11 h-11 rounded-xl grid place-items-center shrink-0 ${c.borongan ? 'bg-ink text-[#FFB27A]' : 'bg-orange-l text-orange-d'}`}><Icon name={c.icon} size={20} /></span>
+                <span className="flex-1 min-w-0"><span className="block font-bold">{c.name}</span><span className="block text-sm text-muted mt-0.5">{c.borongan ? 'Survei, RAB, termin' : c.price} · {n} tukang</span></span>
+                <ChevronRight size={16} className="text-[#8A9099]" />
+              </Link>
+            )
+          })}
+        </div>
+        <p className="mt-3 text-[13px] text-muted">Kisaran ilustrasi untuk demo, belum survei harga resmi.</p>
       </section>
 
-      <section id="masuk" className="max-w-6xl mx-auto px-4 py-16">
-        <h2 className="text-3xl md:text-4xl font-bold">Masuk sesuai peran Anda</h2>
-        <p className="text-ink-2 mt-2">Ini demo: setiap tombol langsung masuk ke akun contoh, tanpa kata sandi.</p>
-        <div className="mt-8 grid md:grid-cols-3 gap-4">
+      <section className="max-w-[1200px] mx-auto px-4 md:px-6 pt-14">
+        <div className="flex flex-wrap justify-between items-end gap-4">
+          <div>
+            <h2 className="text-[28px] md:text-[34px] font-extrabold">Siap kerja di Bandung dan Cimahi</h2>
+            <p className="mt-2 text-ink-2">Dokumen sudah diperiksa tim TukangTikung. Nama, ulasan, dan gambar adalah contoh.</p>
+          </div>
+          <Link to="/cari?kota=Bandung" className="text-[15px] font-bold text-orange hover:text-orange-d">Lihat semua di Bandung</Link>
+        </div>
+        <div className="mt-6 grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] gap-5">{featured.map((t) => <TukangCard key={t.id} t={t} />)}</div>
+      </section>
+
+      <section id="cara-kerja" className="max-w-[1200px] mx-auto px-4 md:px-6 pt-20 scroll-mt-24">
+        <h2 className="text-[28px] md:text-[34px] font-extrabold">Dua cara memesan, semua tercatat</h2>
+        <p className="mt-2 text-ink-2 max-w-[60ch]">Lingkup kerja, harga, jadwal, dan tambahan biaya disetujui di aplikasi, bukan janji lisan di lokasi.</p>
+        <div className="mt-7 grid grid-cols-[repeat(auto-fit,minmax(320px,1fr))] gap-6">
           {[
-            ['pelanggan', 'Pelanggan', 'Cari tukang, minta survei, bandingkan RAB, setujui termin, klaim garansi, beri ulasan.'],
-            ['mitra', 'Mitra kontraktor', 'Onboarding legalitas & deposit, kelola tim, kirim RAB dari templat, laporan progres, tagih termin.'],
-            ['tukang', 'Tukang mandiri', 'Daftar gratis. Unggah dokumen & portofolio, atur area dan tarif, terima atau tolak order.'],
-          ].map(([r, t, d]) => (
-            <div key={r} className="card p-6 flex flex-col">
-              <div className="font-display text-xl font-bold">{t}</div>
-              <p className="text-sm text-ink-2 mt-2 flex-1">{d}</p>
-              <button onClick={() => login(r)} className="btn btn-dark mt-5">Masuk sebagai {t.toLowerCase()}</button>
+            { id: 'harian', title: 'Panggil harian', sub: 'bocor, korsleting, pasang rak', steps: [['Pilih tukang', 'Bandingkan rating, tarif, jarak, dan status verifikasi.'], ['Pesan jadwal', 'Tukang mengonfirmasi. Nomor HP baru tampil setelah itu.'], ['Bayar ke TukangTikung', 'Estimasi biaya ditahan, bukan dikirim ke rekening pribadi.'], ['Setujui hasilnya', 'Dana cair ke tukang, garansi kerja 7–30 hari berjalan.']], cta: ['Cari tukang', '/cari'] },
+            { id: 'borongan', title: 'Borongan / renovasi', sub: 'dapur, kamar mandi, kanopi', steps: [['Survei dan 3 penawaran harga', 'Hingga 3 mitra survei lalu mengirim RAB (rincian biaya per item).'], ['Kontrak digital', 'Lingkup, material, jadwal, dan termin tertulis sebelum mulai.'], ['Bayar per tahap', 'Setiap termin cair setelah Anda menyetujui foto progres.'], ['Garansi dengan dana jaminan', '5% ditahan 60–90 hari setelah serah terima untuk perbaikan.']], cta: ['Ajukan proyek borongan', '/proyek/baru'] },
+          ].map((j) => (
+            <div key={j.id} id={j.id === 'borongan' ? 'borongan' : undefined} className="border border-line rounded-[20px] p-7">
+              <div className="flex flex-wrap items-baseline gap-3"><span className="text-[22px] font-extrabold">{j.title}</span><span className="text-[13px] text-muted">{j.sub}</span></div>
+              <ol className="mt-5 flex flex-col gap-4">
+                {j.steps.map(([a, b], i) => (
+                  <li key={a} className="flex gap-3.5"><span className="w-[30px] h-[30px] rounded-full bg-ink text-white text-sm font-extrabold grid place-items-center shrink-0">{i + 1}</span><div><div className="font-bold">{a}</div><div className="text-[15px] text-ink-2 mt-0.5">{b}</div></div></li>
+                ))}
+              </ol>
+              <Link to={j.cta[1]} className={`btn mt-6 ${j.id === 'borongan' ? 'btn-primary' : 'btn-outline'}`}>{j.cta[0]}</Link>
             </div>
           ))}
         </div>
-        <p className="text-sm text-muted mt-4">Tim internal? <button onClick={() => login('admin')} className="underline font-semibold text-ink">Masuk sebagai admin platform</button> untuk verifikasi, sengketa, dan statistik.</p>
       </section>
 
-      <section className="max-w-6xl mx-auto px-4">
-        <div className="rounded-2xl bg-orange text-white p-8 md:p-12 flex flex-col md:flex-row gap-6 md:items-center justify-between relative overflow-hidden">
-          <div>
-            <h2 className="text-3xl md:text-4xl font-bold">Mulai dari pekerjaan di rumah Anda.</h2>
-            <p className="mt-2 text-white/90">Ceritakan masalahnya, kirim foto. Kami tunjukkan tukang yang cocok di kota Anda.</p>
+      <section className="max-w-[1200px] mx-auto px-4 md:px-6 pt-20">
+        <div className="bg-ink text-white rounded-3xl p-8 md:p-12 flex flex-wrap gap-12 items-center">
+          <div className="flex-[1_1_340px] min-w-0">
+            <h2 className="text-[28px] md:text-[34px] font-extrabold leading-[1.1]">Uang Anda tidak pernah langsung ke tukang.</h2>
+            <p className="mt-3.5 text-[17px] leading-relaxed text-[#C9CDD2] max-w-[46ch]">TukangTikung menahan pembayaran dan meneruskannya per tahap. Contoh proyek {rupiah(48_500_000)}:</p>
           </div>
-          <div className="flex flex-wrap gap-2">
-            <Link to="/cari" className="btn bg-white text-ink hover:bg-paper">Cari tukang</Link>
-            <Link to="/proyek/baru" className="btn btn-dark">Ajukan borongan</Link>
+          <div className="flex-[2_1_520px] min-w-0">
+            <div className="flex h-14 rounded-[14px] overflow-hidden gap-[3px] font-extrabold text-ink">
+              <div className="bg-brand flex items-center px-3.5" style={{ flex: 30 }}>30%</div>
+              <div className="bg-[#FFB27A] flex items-center px-3.5" style={{ flex: 40 }}>40%</div>
+              <div className="bg-[#FFE0CC] flex items-center px-3.5" style={{ flex: 25 }}>25%</div>
+              <div className="bg-white" style={{ flex: 5 }} />
+            </div>
+            <div className="mt-3.5 grid gap-[3px] text-sm text-[#C9CDD2]" style={{ gridTemplateColumns: '30fr 40fr 25fr 5fr' }}>
+              <div><div className="text-white font-bold">DP</div>saat kontrak</div>
+              <div><div className="text-white font-bold">Progres 50%</div>setelah foto disetujui</div>
+              <div><div className="text-white font-bold">Serah terima</div>pekerjaan diterima</div><div />
+            </div>
+            <div className="mt-4 pt-3.5 border-t border-[#33373D] text-sm text-[#C9CDD2]"><b className="text-white">Retensi 5%</b> ditahan 60–90 hari sebagai dana garansi.</div>
           </div>
         </div>
-        <p className="text-center text-sm text-muted mt-4">Anda tukang? <Link to="/daftar-tukang" className="underline font-semibold text-ink">Daftar gratis selamanya</Link></p>
+      </section>
+
+      <section className="max-w-[1200px] mx-auto px-4 md:px-6 pt-20">
+        <div className="flex flex-wrap justify-between items-end gap-4">
+          <h2 className="text-[28px] md:text-[34px] font-extrabold">Hasil kerja dari tukang di TukangTikung</h2>
+          <span className="text-sm text-muted">Ilustrasi contoh, bukan foto pekerjaan nyata</span>
+        </div>
+        <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-3">
+          {TUKANG.slice(0, 8).map((t, i) => (
+            <Link key={t.id} to={`/tukang/${t.id}`} className="group"><WorkArt cat={t.category} seed={i} label={t.portfolio[0]} /><div className="mt-2 text-sm"><b className="group-hover:underline">{t.name}</b> <span className="text-muted">· {t.city}</span></div></Link>
+          ))}
+        </div>
+      </section>
+
+      <section className="max-w-[1200px] mx-auto px-4 md:px-6 pt-20 grid grid-cols-[repeat(auto-fit,minmax(320px,1fr))] gap-12">
+        <div>
+          <h2 className="text-[26px] md:text-[30px] font-extrabold">Yang kami periksa</h2>
+          <ul className="mt-5 flex flex-col gap-3.5 leading-relaxed">
+            {['KTP, SKCK, foto wajah, dan portofolio setiap tukang.', 'NIB, KBLI konstruksi, NPWP, dan deposit jaminan setiap mitra kontraktor.', 'Sertifikat SKK atau BNSP, bila ada, tampil sebagai lencana tambahan.', 'Tambahan biaya wajib diajukan dan disetujui di aplikasi.'].map((x) => <li key={x} className="flex gap-3"><Check size={20} className="text-green shrink-0 mt-0.5" />{x}</li>)}
+          </ul>
+        </div>
+        <div>
+          <h2 className="text-[26px] md:text-[30px] font-extrabold">Yang tidak kami janjikan</h2>
+          <ul className="mt-5 flex flex-col gap-3.5 leading-relaxed text-ink-2">
+            {['Menjamin perilaku seseorang. Verifikasi adalah pemeriksaan dokumen.', 'Menampilkan NIK atau dokumen asli. Hanya statusnya (UU PDP).', 'Melindungi pembayaran di luar aplikasi. Transfer pribadi tidak tercatat.', 'Memungut biaya pendaftaran dari tukang mandiri.'].map((x) => <li key={x} className="flex gap-3"><X size={20} className="text-[#8A9099] shrink-0 mt-0.5" />{x}</li>)}
+          </ul>
+        </div>
+      </section>
+
+      <section id="mitra" className="max-w-[1200px] mx-auto px-4 md:px-6 pt-20 scroll-mt-24">
+        <h2 className="text-[26px] md:text-[30px] font-extrabold">{MITRA.length} mitra kontraktor terverifikasi</h2>
+        <p className="mt-2 text-ink-2">Contoh daftar, nama perusahaan fiktif. Garansi pekerjaan ditanggung mitra sesuai kontrak.</p>
+        <div className="mt-5 grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] border-t border-line">
+          {MITRA.map((m) => (
+            <div key={m.id} className="flex items-center gap-3 py-4 pr-2 border-b border-line">
+              <span className="w-11 h-11 rounded-xl bg-ink text-white font-extrabold text-[15px] grid place-items-center shrink-0">{m.initials}</span>
+              <div className="min-w-0"><div className="text-[15px] font-bold truncate">{m.name}</div><div className="text-[13px] text-muted">{m.city} · {m.projects} proyek · {String(m.rating).replace('.', ',')}</div></div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="max-w-[1200px] mx-auto px-4 md:px-6 pt-20">
+        <figure className="text-center">
+          <div className="flex justify-center gap-0.5">{[...Array(5)].map((_, i) => <Star key={i} size={18} className="fill-ink text-ink" />)}</div>
+          <blockquote className="mt-3 mx-auto max-w-[30ch] text-2xl md:text-[30px] leading-snug font-bold tracking-[-0.02em]">“Foto progres tiap hari, termin baru cair setelah saya cek. Pertama kali renovasi tanpa deg-degan.”</blockquote>
+          <figcaption className="mt-3.5 text-sm text-muted">Pak Gilang, Cimahi · renovasi kamar mandi · testimoni contoh</figcaption>
+        </figure>
+      </section>
+
+      <section id="masuk" className="max-w-[1200px] mx-auto px-4 md:px-6 pt-20">
+        <h2 className="text-[26px] md:text-[30px] font-extrabold">Coba demo sesuai peran</h2>
+        <p className="mt-2 text-ink-2">Setiap tombol langsung masuk ke akun contoh, tanpa kata sandi.</p>
+        <div className="mt-6 grid grid-cols-[repeat(auto-fit,minmax(240px,1fr))] gap-4">
+          {[['pelanggan', 'Pelanggan', 'Cari tukang, bandingkan RAB, setujui termin, klaim garansi.'], ['mitra', 'Mitra kontraktor', 'Permintaan survei, buat RAB, laporan progres, tagih termin.'], ['tukang', 'Tukang mandiri', 'Terima atau tolak order, jadwal, pendapatan, dokumen.'], ['admin', 'Admin platform', 'Verifikasi dokumen, sengketa, pencairan, statistik.']].map(([r, t, d]) => (
+            <button key={r} onClick={() => login(r)} className="card lift p-5 text-left flex flex-col">
+              <span className="text-lg font-extrabold">{t}</span>
+              <span className="text-sm text-ink-2 mt-1.5 flex-1">{d}</span>
+              <span className="text-sm font-bold text-orange mt-4 flex items-center gap-1">Masuk sebagai {t.toLowerCase()} <ChevronRight size={14} /></span>
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <section className="max-w-[1200px] mx-auto px-4 md:px-6 pt-16">
+        <div className="bg-orange-l rounded-3xl px-6 md:px-12 py-10 flex flex-wrap gap-6 items-center justify-between">
+          <div className="max-w-[560px]">
+            <h2 className="text-[26px] md:text-[30px] font-extrabold">Anda tukang? Daftar gratis, dibayar tepat waktu.</h2>
+            <p className="mt-2.5 leading-relaxed text-ink-2">Upah dibayar pelanggan ke TukangTikung sebelum Anda berangkat. Tanpa potongan untuk tukang mandiri.</p>
+          </div>
+          <div className="flex gap-2.5 flex-wrap"><Link to="/daftar-tukang" className="btn btn-primary">Daftar sebagai tukang</Link><Link to="/masuk?peran=mitra" className="btn btn-outline">Daftarkan perusahaan</Link></div>
+        </div>
       </section>
     </main>
   )

@@ -118,7 +118,7 @@ export function Masuk() {
         {items.map(([r, I, d]) => (
           <button key={r} onClick={() => go(r)} className={`card p-6 text-left hover:border-ink transition ${hl === r ? '!border-orange ring-2 ring-orange-l' : ''}`}>
             <div className="w-11 h-11 rounded-xl bg-orange-l text-orange-d grid place-items-center"><I size={22} /></div>
-            <div className="font-display text-xl font-bold mt-3">{ROLES[r].label}</div>
+            <div className="text-xl font-extrabold mt-3">{ROLES[r].label}</div>
             <div className="text-xs text-muted">Akun contoh: {ROLES[r].name}</div>
             <p className="text-sm text-ink-2 mt-2">{d}</p>
             <div className="text-sm font-semibold text-orange-d mt-4 flex items-center gap-1">Masuk <ArrowRight size={14} /></div>

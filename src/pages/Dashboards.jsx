@@ -3,6 +3,7 @@ import { useParams, useSearchParams, Navigate, Link } from 'react-router-dom'
 import * as I from '../icons'
 import { PROJECTS, DAILY_ORDERS, RAB_OFFERS, MITRA, TUKANG, CATEGORIES, rupiah } from '../data'
 import { useSession, ROLES, Avatar, Stars, StatusChip, Toast, DataContoh, Icon } from '../components/ui'
+import { WorkArt, Avatar as ArtAvatar } from '../components/art'
 
 const TABS = {
   pelanggan: [['ringkasan', 'Ringkasan', 'LayoutDashboard'], ['proyek', 'Proyek borongan', 'Ruler'], ['rab', 'RAB masuk', 'ClipboardList'], ['harian', 'Order harian', 'CalendarCheck'], ['garansi', 'Garansi & klaim', 'ShieldCheck']],
@@ -14,7 +15,7 @@ const TABS = {
 const Stat = ({ label, value, sub, icon, tone = 'orange' }) => (
   <div className="card p-4">
     <div className="flex justify-between items-start"><div className="text-xs text-muted font-semibold uppercase tracking-wide">{label}</div><div className={`w-8 h-8 rounded-lg grid place-items-center ${tone === 'orange' ? 'bg-orange-l text-orange-d' : tone === 'green' ? 'bg-green-l text-green' : 'bg-blue-l text-blue'}`}><Icon name={icon} size={16} /></div></div>
-    <div className="font-display text-2xl font-bold mt-2">{value}</div>
+    <div className="text-2xl font-extrabold mt-2">{value}</div>
     {sub && <div className="text-xs text-muted mt-0.5">{sub}</div>}
   </div>
 )
@@ -72,10 +73,10 @@ function ProjectPanel({ p, notify }) {
       <div className="flex flex-wrap justify-between gap-3">
         <div>
           <div className="text-xs text-muted font-semibold">{p.id} · {p.address}</div>
-          <div className="font-display text-2xl font-bold">{p.title}</div>
+          <div className="text-2xl font-extrabold">{p.title}</div>
           <div className="text-sm text-ink-2">{p.mitra.name} · {p.start} – {p.end}</div>
         </div>
-        <div className="text-right"><span className={`chip ${p.status === 'Berjalan' ? 'bg-orange-l text-orange-d' : 'bg-green-l text-green'}`}>{p.status}</span><div className="font-display text-xl font-bold mt-1">{rupiah(p.total)}</div><div className="text-xs text-muted">{escrow}% masih di escrow</div></div>
+        <div className="text-right"><span className={`chip ${p.status === 'Berjalan' ? 'bg-orange-l text-orange-d' : 'bg-green-l text-green'}`}>{p.status}</span><div className="text-xl font-extrabold mt-1">{rupiah(p.total)}</div><div className="text-xs text-muted">{escrow}% masih di escrow</div></div>
       </div>
       <div className="mt-4 h-2.5 rounded-full bg-paper-2 overflow-hidden"><div className="h-full bg-orange" style={{ width: `${p.progress}%` }} /></div>
       <div className="text-xs text-muted mt-1">Progres fisik {p.progress}%</div>
@@ -108,7 +109,7 @@ function ProjectPanel({ p, notify }) {
                   <div className="absolute -left-[7px] w-3 h-3 rounded-full bg-orange mt-1.5" />
                   <div className="text-xs text-muted">{u.date} · {u.by}</div>
                   <div className="text-sm">{u.text}</div>
-                  <div className="flex gap-1.5 mt-2">{[1, 2, 3].map((k) => <div key={k} className="w-14 h-10 rounded-md bg-paper-2 grid place-items-center"><I.Image size={14} className="text-muted" /></div>)}</div>
+                  <div className="flex gap-1.5 mt-2">{(u.photos || []).map((c, k) => <div key={k} className="w-[84px]"><WorkArt cat={c} seed={k + u.date.length} showTag={false} rounded={8} /></div>)}</div>
                 </li>
               ))}
             </ol>
@@ -146,7 +147,7 @@ function Pelanggan({ tab, go, notify }) {
           return (
             <div key={o.mitra.id} className={`card p-5 flex flex-col ${chosen === i ? '!border-green ring-2 ring-green-l' : ''}`}>
               <div className="flex gap-3 items-center"><Avatar name={o.mitra.initials} tone="dark" size={40} /><div><div className="font-semibold text-sm leading-tight">{o.mitra.name}</div><Stars value={o.mitra.rating} count={o.mitra.projects} /></div></div>
-              <div className="font-display text-2xl font-bold mt-4">{rupiah(o.total)}</div>
+              <div className="text-2xl font-extrabold mt-4">{rupiah(o.total)}</div>
               {o.total === min && <span className="chip bg-green-l text-green w-fit mt-1">Termurah</span>}
               <div className="text-sm text-ink-2 mt-3 space-y-1 flex-1">
                 <div className="flex gap-2"><I.Clock size={15} className="mt-0.5 shrink-0" /> {o.days} hari kerja</div>
@@ -252,7 +253,7 @@ function RabBuilder({ notify }) {
         <div className="mt-5 ml-auto max-w-xs space-y-1 text-sm">
           <div className="flex justify-between"><span>Subtotal</span><span>{rupiah(sub)}</span></div>
           <div className="flex justify-between items-center"><span>Overhead & jasa</span><span><input className="input !py-1 !w-14 inline" value={margin} onChange={(e) => setMargin(Number(e.target.value) || 0)} /> %</span></div>
-          <div className="flex justify-between font-display text-xl font-bold pt-2 border-t border-line"><span>Total</span><span>{rupiah(total)}</span></div>
+          <div className="flex justify-between text-xl font-extrabold pt-2 border-t border-line"><span>Total</span><span>{rupiah(total)}</span></div>
         </div>
       </div>
       <div className="card p-5 mt-4 text-sm grid sm:grid-cols-4 gap-3">
@@ -291,7 +292,7 @@ function Mitra({ tab, go, notify }) {
     <div>
       <H>Proyek berjalan</H>
       <div className="card p-5">
-        <div className="flex justify-between flex-wrap gap-2"><div><div className="text-xs text-muted">{PROJECTS[0].id}</div><div className="font-display text-xl font-bold">{PROJECTS[0].title}</div><div className="text-sm text-muted">Bu Rina K. · {PROJECTS[0].address}</div></div><div className="text-right"><div className="font-bold">{rupiah(PROJECTS[0].total)}</div><span className="chip bg-orange-l text-orange-d">Termin 2 menunggu pelanggan</span></div></div>
+        <div className="flex justify-between flex-wrap gap-2"><div><div className="text-xs text-muted">{PROJECTS[0].id}</div><div className="text-xl font-extrabold">{PROJECTS[0].title}</div><div className="text-sm text-muted">Bu Rina K. · {PROJECTS[0].address}</div></div><div className="text-right"><div className="font-bold">{rupiah(PROJECTS[0].total)}</div><span className="chip bg-orange-l text-orange-d">Termin 2 menunggu pelanggan</span></div></div>
         <div className="mt-4 h-2.5 rounded-full bg-paper-2 overflow-hidden"><div className="h-full bg-orange" style={{ width: '55%' }} /></div>
         <div className="mt-5 border-2 border-dashed border-line rounded-xl p-4">
           <div className="font-semibold text-sm">Unggah laporan progres hari ini</div>
@@ -305,9 +306,9 @@ function Mitra({ tab, go, notify }) {
     <div>
       <H sub="Tukang yang tampil sebagai bagian dari tim Anda. Dokumen tetap diverifikasi per orang.">Tim tukang</H>
       <div className="card divide-y divide-line">
-        {TUKANG.filter((t) => t.mitra).slice(0, 8).map((t) => {
+        {TUKANG.filter((t) => t.mitra).slice(0, 14).map((t) => {
           const c = CATEGORIES.find((x) => x.id === t.category)
-          return <div key={t.id} className="p-4 flex items-center gap-3"><Avatar name={t.name} size={38} /><div className="flex-1"><div className="font-semibold text-sm">{t.name}</div><div className="text-xs text-muted">{c.short} · {t.exp} th</div></div><Stars value={t.rating} /><span className="chip bg-green-l text-green">Aktif</span></div>
+          return <div key={t.id} className="p-4 flex items-center gap-3"><ArtAvatar look={t.look} size={40} rounded={10} /><div className="flex-1"><div className="font-semibold text-sm">{t.name}</div><div className="text-xs text-muted">{c.short} · {t.exp} th</div></div><Stars value={t.rating} /><span className="chip bg-green-l text-green">Aktif</span></div>
         })}
       </div>
       <button onClick={() => notify('Undangan bergabung dikirim lewat WhatsApp (demo).')} className="btn btn-dark mt-4 text-sm"><I.UserPlus size={16} /> Undang tukang</button>
@@ -357,7 +358,7 @@ function Tukang({ tab, go, notify }) {
         {orders.map((o) => (
           <div key={o.id} className="card p-4 flex flex-wrap gap-4 items-center">
             <div className="flex-1 min-w-[200px]"><div className="font-semibold">{o.job}</div><div className="text-sm text-muted">{o.who} · {o.area} · {o.date}</div></div>
-            <div className="font-display text-lg font-bold">{rupiah(o.pay)}</div>
+            <div className="text-lg font-extrabold">{rupiah(o.pay)}</div>
             {o.st === 'baru' ? <><button onClick={() => setSt(o.id, 'ok', 'Order diterima. Nomor pelanggan sekarang terlihat.')} className="btn btn-primary text-sm">Terima</button><button onClick={() => setSt(o.id, 'tolak', 'Order ditolak.')} className="btn btn-ghost text-sm">Tolak</button></> : <span className={`chip ${o.st === 'ok' ? 'bg-green-l text-green' : 'bg-paper-2 text-muted'}`}>{o.st === 'ok' ? 'Diterima' : 'Ditolak'}</span>}
           </div>
         ))}
@@ -449,7 +450,7 @@ function Admin({ tab, notify }) {
     <div>
       <H>Sengketa</H>
       <div className="card p-5">
-        <div className="flex justify-between flex-wrap gap-2"><div><div className="text-xs text-muted">SKT-0193 · proyek P-2609-041</div><div className="font-display text-xl font-bold">Rembesan kamar mandi setelah serah terima</div><div className="text-sm text-muted">Pak Haris (Dago) vs Mandor Ujang & Tim · nilai retensi {rupiah(1_850_000)}</div></div><span className="chip bg-orange-l text-orange-d">Mediasi hari ke-4</span></div>
+        <div className="flex justify-between flex-wrap gap-2"><div><div className="text-xs text-muted">SKT-0193 · proyek P-2609-041</div><div className="text-xl font-extrabold">Rembesan kamar mandi setelah serah terima</div><div className="text-sm text-muted">Pak Haris (Dago) vs Mandor Ujang & Tim · nilai retensi {rupiah(1_850_000)}</div></div><span className="chip bg-orange-l text-orange-d">Mediasi hari ke-4</span></div>
         <ol className="mt-4 text-sm space-y-2 border-l-2 border-line pl-4">
           <li><b>2 Nov</b> · Pelanggan ajukan klaim garansi + 4 foto rembesan.</li>
           <li><b>4 Nov</b> · Mitra survei ulang, mengakui sambungan pipa kurang rapat.</li>
