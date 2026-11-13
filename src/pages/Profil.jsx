@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { ChevronLeft, Check, Lock, ShieldCheck, Phone, Heart, Star } from 'lucide-react'
-import { TUKANG, CATEGORIES, formatPrice, reviewsFor, ratingBars } from '../data'
+import { TUKANG, CATEGORIES, formatPrice, reviewsFor, ratingBars, PORTFOLIO_PHOTOS } from '../data'
 import { Stars, Toast, useSession, TukangCard } from '../components/ui'
 import { Avatar, WorkArt } from '../components/art'
 
@@ -34,7 +34,7 @@ export default function Profil() {
       <div className="mt-5 flex flex-wrap gap-12 items-start">
         <div className="flex-[999_1_560px] min-w-0">
           <div className="flex flex-wrap gap-6 items-center">
-            <Avatar look={t.look} size={128} rounded={28} label={`Ilustrasi ${t.name}`} />
+            <Avatar look={t.look} photo={t.photo} size={128} rounded={28} label={`${t.photo ? 'Foto' : 'Ilustrasi'} ${t.name}`} />
             <div className="flex-1 min-w-[240px]">
               <h1 className="text-[32px] md:text-[38px] font-extrabold">{t.fullName}</h1>
               <p className="mt-1 text-[17px] text-ink-2">{cat.name} · {t.area}, {t.city} · {t.mitra ? `tim ${t.mitra.name}` : 'tukang mandiri'}</p>
@@ -61,8 +61,8 @@ export default function Profil() {
 
           <section className="mt-10 pt-9 border-t border-line">
             <h2 className="text-2xl font-extrabold">Hasil kerja</h2>
-            <p className="mt-1.5 text-[15px] text-muted">Ilustrasi contoh. Di produk nyata, foto diunggah tukang dan dicek tim kami.</p>
-            <div className="mt-4 grid grid-cols-2 md:grid-cols-3 gap-3">{t.portfolio.map((p, i) => <WorkArt key={p} cat={t.category} seed={parseInt(t.id.slice(1)) + i} label={p} />)}</div>
+            <p className="mt-1.5 text-[15px] text-muted">Foto dan ilustrasi contoh. Di produk nyata, foto diunggah tukang dan dicek tim kami.</p>
+            <div className="mt-4 grid grid-cols-2 md:grid-cols-3 gap-3">{t.portfolio.map((p, i) => <WorkArt key={p} cat={t.category} seed={parseInt(t.id.slice(1)) + i} label={p} photo={PORTFOLIO_PHOTOS[p]} />)}</div>
           </section>
 
           <section className="mt-10 pt-9 border-t border-line">

@@ -227,3 +227,12 @@ export const RAB_OFFERS = [
 ]
 
 export const STATS = { tukang: TUKANG.length, mitra: MITRA.length, kota: CITIES.length, ulasan: TUKANG.reduce((s, t) => s + t.reviews, 0) }
+
+// ---------- Foto realistis (AI, fiktif) untuk sebagian tukang; sisanya ilustrasi ----------
+const IMG = (f) => `${import.meta.env.BASE_URL}img/${f}`
+const topIn = (cat) => TUKANG.filter((t) => t.category === cat && (t.city === 'Bandung' || t.city === 'Cimahi')).sort((a, b) => b.rating - a.rating)[0]
+;[['bangunan', 'p01.png'], ['listrik', 'p02.png'], ['kayu', 'p03.png']].forEach(([c, f]) => { const t = topIn(c); if (t) { t.photo = IMG(f); t.readySoon = true } })
+const kayuTop = topIn('kayu')
+if (kayuTop) { kayuTop.portfolio = ['Kitchen set HPL', ...kayuTop.portfolio.filter((p) => p !== 'Kitchen set HPL')].slice(0, 6) }
+export const PORTFOLIO_PHOTOS = { 'Kitchen set HPL': IMG('w-kayu-1.png') }
+export const HERO_PHOTO = IMG('w-kayu-1.png')

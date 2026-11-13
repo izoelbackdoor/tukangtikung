@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Search, Check, X, Camera, Lock, Star, ChevronRight } from 'lucide-react'
-import { CATEGORIES, CITIES, TUKANG, MITRA, STATS, rupiah } from '../data'
+import { CATEGORIES, CITIES, TUKANG, MITRA, STATS, rupiah, PORTFOLIO_PHOTOS, HERO_PHOTO } from '../data'
 import { Icon, TukangCard, useSession } from '../components/ui'
 import { WorkArt } from '../components/art'
 
@@ -13,7 +13,7 @@ export default function Home() {
   const [mode, setMode] = useState('harian')
   const [q, setQ] = useState('')
   const [city, setCity] = useState('Bandung')
-  const featured = TUKANG.filter((t) => (t.city === 'Bandung' || t.city === 'Cimahi') && !CATEGORIES.find((c) => c.id === t.category).borongan).sort((a, b) => (b.readySoon - a.readySoon) || b.rating - a.rating).slice(0, 8)
+  const featured = TUKANG.filter((t) => (t.city === 'Bandung' || t.city === 'Cimahi') && !CATEGORIES.find((c) => c.id === t.category).borongan).sort((a, b) => (!!b.photo - !!a.photo) || (b.readySoon - a.readySoon) || b.rating - a.rating).slice(0, 8)
 
   const submit = (e) => {
     e.preventDefault()
@@ -65,7 +65,7 @@ export default function Home() {
             </div>
             <div className="mt-4 grid grid-cols-3 gap-2">
               <WorkArt cat="bangunan" seed={0} showTag={false} rounded={10} />
-              <WorkArt cat="kayu" seed={3} showTag={false} rounded={10} />
+              <WorkArt cat="kayu" seed={3} showTag={false} rounded={10} photo={HERO_PHOTO} />
               <WorkArt cat="ledeng" seed={1} showTag={false} rounded={10} />
             </div>
             <div className="mt-4 h-2 bg-paper-2 rounded-full overflow-hidden"><div className="h-full bg-brand rounded-full" style={{ width: '55%' }} /></div>
@@ -104,7 +104,7 @@ export default function Home() {
         <div className="flex flex-wrap justify-between items-end gap-4">
           <div>
             <h2 className="text-[28px] md:text-[34px] font-extrabold">Siap kerja di Bandung dan Cimahi</h2>
-            <p className="mt-2 text-ink-2">Dokumen sudah diperiksa tim TukangTikung. Nama, ulasan, dan gambar adalah contoh.</p>
+            <p className="mt-2 text-ink-2">Dokumen sudah diperiksa tim TukangTikung. Nama, ulasan, dan foto adalah contoh (foto dibuat dengan AI).</p>
           </div>
           <Link to="/cari?kota=Bandung" className="text-[15px] font-bold text-orange hover:text-orange-d">Lihat semua di Bandung</Link>
         </div>
@@ -158,11 +158,11 @@ export default function Home() {
       <section className="max-w-[1200px] mx-auto px-4 md:px-6 pt-20">
         <div className="flex flex-wrap justify-between items-end gap-4">
           <h2 className="text-[28px] md:text-[34px] font-extrabold">Hasil kerja dari tukang di TukangTikung</h2>
-          <span className="text-sm text-muted">Ilustrasi contoh, bukan foto pekerjaan nyata</span>
+          <span className="text-sm text-muted">Foto AI dan ilustrasi contoh, bukan pekerjaan nyata</span>
         </div>
         <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-3">
-          {TUKANG.slice(0, 8).map((t, i) => (
-            <Link key={t.id} to={`/tukang/${t.id}`} className="group"><WorkArt cat={t.category} seed={i} label={t.portfolio[0]} /><div className="mt-2 text-sm"><b className="group-hover:underline">{t.name}</b> <span className="text-muted">· {t.city}</span></div></Link>
+          {[TUKANG.find((x) => PORTFOLIO_PHOTOS[x.portfolio[0]]), ...TUKANG.slice(0, 8)].filter(Boolean).filter((x, i, a) => a.indexOf(x) === i).slice(0, 8).map((t, i) => (
+            <Link key={t.id} to={`/tukang/${t.id}`} className="group"><WorkArt cat={t.category} seed={i} label={t.portfolio[0]} photo={PORTFOLIO_PHOTOS[t.portfolio[0]]} /><div className="mt-2 text-sm"><b className="group-hover:underline">{t.name}</b> <span className="text-muted">· {t.city}</span></div></Link>
           ))}
         </div>
       </section>

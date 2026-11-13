@@ -103,7 +103,7 @@ export default function Cari() {
             const rv = reviewsFor(t, 1)[0]
             return (
               <article key={t.id} className="card lift !rounded-[18px] p-5 flex flex-wrap gap-5">
-                <Link to={`/tukang/${t.id}`} aria-label={`Profil ${t.name}`}><Avatar look={t.look} size={96} rounded={16} label={`Ilustrasi ${t.name}`} /></Link>
+                <Link to={`/tukang/${t.id}`} aria-label={`Profil ${t.name}`}><Avatar look={t.look} photo={t.photo} size={96} rounded={16} label={`${t.photo ? 'Foto' : 'Ilustrasi'} ${t.name}`} /></Link>
                 <div className="flex-[1_1_280px] min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
                     <Link to={`/tukang/${t.id}`} className="text-[19px] font-extrabold hover:underline">{t.fullName}</Link>

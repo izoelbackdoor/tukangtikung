@@ -8,7 +8,8 @@ const PALETTES = [
   { wall: '#E9E3F5', floor: '#BDB3D3', accent: '#5B4B8A', deep: '#2E2747', line: '#7A6F96', sky: '#EEEAF8' },
 ]
 
-export function Avatar({ look, size = 96, rounded = 20, label }) {
+export function Avatar({ look, size = 96, rounded = 20, label, photo }) {
+  if (photo) return <img src={photo} alt={label || 'Foto contoh'} width={size} height={size} loading="lazy" style={{ width: size, height: size, borderRadius: rounded, objectFit: 'cover', flexShrink: 0, display: 'block' }} />
   const { skin, shirt, hat, bg, mustache, glasses, hair } = look
   const hairColor = '#1F1A17'
   return (
@@ -147,8 +148,14 @@ function Scene({ cat, p }) {
   }
 }
 
-export function WorkArt({ cat, seed = 0, label, rounded = 14, ratio = '4 / 3', showTag = true }) {
+export function WorkArt({ cat, seed = 0, label, rounded = 14, ratio = '4 / 3', showTag = true, photo }) {
   const p = PALETTES[Math.abs(seed) % PALETTES.length]
+  if (photo) return (
+    <figure style={{ margin: 0, position: 'relative', aspectRatio: ratio, borderRadius: rounded, overflow: 'hidden', background: '#E6E8EB' }}>
+      <img src={photo} alt={`Foto contoh: ${label || cat}`} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+      {(label || showTag) && <figcaption style={{ position: 'absolute', left: 8, right: 8, bottom: 8, display: 'flex', justifyContent: 'space-between', gap: 6, alignItems: 'flex-end' }}>{label ? <span style={{ background: 'rgba(23,25,28,.82)', color: '#fff', fontSize: 12, fontWeight: 600, padding: '4px 8px', borderRadius: 8 }}>{label}</span> : <span />}{showTag && <span style={{ background: 'rgba(255,255,255,.9)', color: '#3F454D', fontSize: 10, fontWeight: 600, padding: '3px 6px', borderRadius: 6 }}>foto AI</span>}</figcaption>}
+    </figure>
+  )
   return (
     <figure style={{ margin: 0, position: 'relative', aspectRatio: ratio, borderRadius: rounded, overflow: 'hidden', background: p.wall }}>
       <svg viewBox="0 0 160 120" preserveAspectRatio="xMidYMid slice" role="img" aria-label={`Ilustrasi contoh: ${label || cat}`} style={{ width: '100%', height: '100%', display: 'block' }}>

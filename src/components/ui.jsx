@@ -118,9 +118,10 @@ export function TukangCard({ t }) {
   return (
     <Link to={`/tukang/${t.id}`} className="card lift overflow-hidden flex flex-col text-ink">
       <div className="relative">
+        {t.photo ? <img src={t.photo} alt={`Foto contoh ${t.name}`} loading="lazy" className="h-[150px] w-full object-cover object-top" /> : (
         <div className="h-[150px] grid place-items-end justify-center" style={{ background: t.look.bg }}>
           <ArtAvatar look={t.look} size={140} rounded={0} label={`Ilustrasi ${t.name}`} />
-        </div>
+        </div>)}
         <span className="absolute left-3 top-3"><Verified small /></span>
         {t.skk && <span className="absolute right-3 top-3 chip bg-white text-blue">SKK</span>}
       </div>
