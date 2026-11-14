@@ -8,7 +8,7 @@ npm run dev
 
 ## Deploy ke Vercel
 npx vercel --prod      # framework: Vite, output: dist
-`public/vercel.json` sudah berisi rewrite SPA supaya /cari, /tukang/:id, /app/:role bisa dibuka langsung.
+`vercel.json` (root) berisi rewrite SPA supaya /cari, /tukang/:id, /app/:role bisa dibuka langsung.
 
 ## Struktur
 - src/data.js            data contoh (kategori, tukang, mitra, proyek, RAB)
