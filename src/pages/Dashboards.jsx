@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useSearchParams, Navigate, Link } from 'react-router-dom'
 import * as I from '../icons'
 import { PROJECTS, DAILY_ORDERS, RAB_OFFERS, MITRA, TUKANG, CATEGORIES, rupiah } from '../data'
+import { ADMIN_PHOTOS } from '../photos'
 import { useSession, ROLES, Avatar, Stars, StatusChip, Toast, DataContoh, Icon } from '../components/ui'
 import { WorkArt, Avatar as ArtAvatar } from '../components/art'
 
@@ -109,7 +110,7 @@ function ProjectPanel({ p, notify }) {
                   <div className="absolute -left-[7px] w-3 h-3 rounded-full bg-orange mt-1.5" />
                   <div className="text-xs text-muted">{u.date} · {u.by}</div>
                   <div className="text-sm">{u.text}</div>
-                  <div className="flex gap-1.5 mt-2">{(u.photos || []).map((c, k) => <div key={k} className="w-[84px]"><WorkArt cat={c} seed={k + u.date.length} showTag={false} rounded={8} /></div>)}</div>
+                  <div className="flex gap-1.5 mt-2">{(u.photos || []).map((src, k) => <div key={k} className="w-[84px]"><WorkArt photo={src} label="Foto progres contoh" showTag={false} rounded={8} /></div>)}</div>
                 </li>
               ))}
             </ol>
@@ -146,7 +147,7 @@ function Pelanggan({ tab, go, notify }) {
           const min = Math.min(...RAB_OFFERS.map((x) => x.total))
           return (
             <div key={o.mitra.id} className={`card p-5 flex flex-col ${chosen === i ? '!border-green ring-2 ring-green-l' : ''}`}>
-              <div className="flex gap-3 items-center"><Avatar name={o.mitra.initials} tone="dark" size={40} /><div><div className="font-semibold text-sm leading-tight">{o.mitra.name}</div><Stars value={o.mitra.rating} count={o.mitra.projects} /></div></div>
+              <div className="flex gap-3 items-center"><img src={o.mitra.photo} alt={`Foto contoh ${o.mitra.name}`} width={40} height={40} loading="lazy" className="w-10 h-10 rounded-xl object-cover shrink-0" /><div><div className="font-semibold text-sm leading-tight">{o.mitra.name}</div><Stars value={o.mitra.rating} count={o.mitra.projects} /></div></div>
               <div className="text-2xl font-extrabold mt-4">{rupiah(o.total)}</div>
               {o.total === min && <span className="chip bg-green-l text-green w-fit mt-1">Termurah</span>}
               <div className="text-sm text-ink-2 mt-3 space-y-1 flex-1">
@@ -308,7 +309,7 @@ function Mitra({ tab, go, notify }) {
       <div className="card divide-y divide-line">
         {TUKANG.filter((t) => t.mitra).slice(0, 14).map((t) => {
           const c = CATEGORIES.find((x) => x.id === t.category)
-          return <div key={t.id} className="p-4 flex items-center gap-3"><ArtAvatar look={t.look} size={40} rounded={10} /><div className="flex-1"><div className="font-semibold text-sm">{t.name}</div><div className="text-xs text-muted">{c.short} · {t.exp} th</div></div><Stars value={t.rating} /><span className="chip bg-green-l text-green">Aktif</span></div>
+          return <div key={t.id} className="p-4 flex items-center gap-3"><ArtAvatar look={t.look} photo={t.photo} focus={t.photoFocus} size={40} rounded={10} label={`Foto contoh ${t.name}`} /><div className="flex-1"><div className="font-semibold text-sm">{t.name}</div><div className="text-xs text-muted">{c.short} · {t.exp} th</div></div><Stars value={t.rating} /><span className="chip bg-green-l text-green">Aktif</span></div>
         })}
       </div>
       <button onClick={() => notify('Undangan bergabung dikirim lewat WhatsApp (demo).')} className="btn btn-dark mt-4 text-sm"><I.UserPlus size={16} /> Undang tukang</button>
@@ -426,10 +427,10 @@ function Tukang({ tab, go, notify }) {
 /* ---------------- ADMIN ---------------- */
 function Admin({ tab, notify }) {
   const [queue, setQueue] = useState([
-    { id: 1, name: 'Hendra W.', type: 'Tukang listrik', docs: 'KTP, SKCK, selfie, portofolio', city: 'Bandung', st: 'baru' },
-    { id: 2, name: 'CV Atap Prima', type: 'Mitra kontraktor', docs: 'NIB, KBLI 43909, NPWP, akta', city: 'Bekasi', st: 'baru' },
-    { id: 3, name: 'Komang T.', type: 'Tukang kayu', docs: 'KTP, selfie, portofolio (SKCK menyusul)', city: 'Denpasar', st: 'baru' },
-    { id: 4, name: 'Udin H.', type: 'Tukang cat', docs: 'KTP buram, selfie tidak cocok', city: 'Depok', st: 'baru', flag: true },
+    { id: 1, name: 'Hendra W.', type: 'Tukang listrik', docs: 'KTP, SKCK, selfie, portofolio', city: 'Bandung', st: 'baru', photo: ADMIN_PHOTOS[0] },
+    { id: 2, name: 'CV Atap Prima', type: 'Mitra kontraktor', docs: 'NIB, KBLI 43909, NPWP, akta', city: 'Bekasi', st: 'baru', photo: ADMIN_PHOTOS[1] },
+    { id: 3, name: 'Komang T.', type: 'Tukang kayu', docs: 'KTP, selfie, portofolio (SKCK menyusul)', city: 'Denpasar', st: 'baru', photo: ADMIN_PHOTOS[2] },
+    { id: 4, name: 'Udin H.', type: 'Tukang cat', docs: 'KTP buram, selfie tidak cocok', city: 'Depok', st: 'baru', flag: true, photo: ADMIN_PHOTOS[3] },
   ])
   const setSt = (id, st, m) => { setQueue(queue.map((q) => (q.id === id ? { ...q, st } : q))); notify(m) }
   if (tab === 'verifikasi') return (
@@ -438,7 +439,7 @@ function Admin({ tab, notify }) {
       <div className="space-y-3">
         {queue.map((q) => (
           <div key={q.id} className={`card p-4 flex flex-wrap gap-4 items-center ${q.flag ? '!border-red' : ''}`}>
-            <Avatar name={q.name} size={40} tone={q.type.startsWith('Mitra') ? 'dark' : 'orange'} />
+            <img src={q.photo} alt={`Foto contoh ${q.name}`} width={40} height={40} loading="lazy" className="w-10 h-10 rounded-xl object-cover shrink-0" />
             <div className="flex-1 min-w-[220px]"><div className="font-semibold">{q.name} <span className="text-muted font-normal text-sm">· {q.type} · {q.city}</span></div><div className="text-sm text-muted">{q.docs}</div>{q.flag && <div className="text-xs text-red font-semibold mt-1">Ditandai sistem: wajah tidak cocok dengan KTP</div>}</div>
             {q.st === 'baru' ? <><button onClick={() => setSt(q.id, 'ok', `${q.name} disetujui dan tayang.`)} className="btn btn-primary text-sm">Setujui</button><button onClick={() => setSt(q.id, 'no', `${q.name} diminta unggah ulang dokumen.`)} className="btn btn-ghost text-sm">Minta ulang</button></> : <span className={`chip ${q.st === 'ok' ? 'bg-green-l text-green' : 'bg-red-l text-red'}`}>{q.st === 'ok' ? 'Disetujui' : 'Dikembalikan'}</span>}
           </div>
