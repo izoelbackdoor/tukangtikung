@@ -101,7 +101,7 @@ export function Footer() {
           <div className="flex flex-col gap-2"><span className="font-bold text-ink">Bergabung</span><Link to="/daftar-tukang" className="hover:text-ink">Daftar tukang</Link><Link to="/masuk?peran=mitra" className="hover:text-ink">Mitra kontraktor</Link><Link to="/proyek/baru" className="hover:text-ink">Ajukan borongan</Link><Link to="/masuk" className="hover:text-ink">Masuk demo</Link></div>
         </div>
       </div>
-      <div className="border-t border-line text-xs text-center py-4 text-muted">© 2026 TukangTikung (demo). Data, foto, dan ilustrasi adalah contoh.</div>
+      <div className="border-t border-line text-xs text-center py-4 text-muted">© 2026 TukangTikung (demo). Data dan foto stok adalah contoh, bukan pekerjaan nyata.</div>
     </footer>
   )
 }
@@ -118,7 +118,7 @@ export function TukangCard({ t }) {
   return (
     <Link to={`/tukang/${t.id}`} className="card lift overflow-hidden flex flex-col text-ink">
       <div className="relative">
-        {t.photo ? <img src={t.photo} alt={`Foto contoh ${t.name}`} loading="lazy" className="h-[150px] w-full object-cover object-top" /> : (
+        {t.photo ? <img src={t.photo} alt={`Foto contoh ${t.name}`} loading="lazy" className={`h-[150px] w-full object-cover ${t.photoFocus === 'top' ? 'object-top' : 'object-center'}`} /> : (
         <div className="h-[150px] grid place-items-end justify-center" style={{ background: t.look.bg }}>
           <ArtAvatar look={t.look} size={140} rounded={0} label={`Ilustrasi ${t.name}`} />
         </div>)}

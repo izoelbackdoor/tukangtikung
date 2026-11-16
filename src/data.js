@@ -1,5 +1,6 @@
 // Semua data di file ini adalah DATA CONTOH untuk demo. Nama, angka, ulasan, dan dokumen fiktif.
 // Dibangkitkan secara deterministik (seed tetap) supaya tampilan konsisten di setiap muat ulang.
+import { assignTukangPhotos, MITRA_PHOTOS, PROGRESS_PHOTOS } from './photos'
 
 export const CATEGORIES = [
   { id: 'bangunan', name: 'Tukang bangunan', short: 'Bangunan', icon: 'BrickWall', desc: 'Plester, pasang bata, keramik, cor dak, perbaikan retak.', price: 'Rp 150–200 rb / hari', unit: 'hari', base: 150 },
@@ -53,6 +54,7 @@ export const MITRA = MITRA_SEED.map(([name, city, initials, kbli, since], i) => 
   projects: between(40, 240), rating: Math.round((4.5 + rand() * 0.45) * 10) / 10,
   team: between(6, 34), deposit: pick([5, 5, 10, 15]) * 1_000_000,
   areas: CITY_AREAS[city].slice(0, 3),
+  photo: MITRA_PHOTOS[i],
 }))
 
 const FIRST = ['Asep', 'Ujang', 'Dedi', 'Cecep', 'Yayan', 'Iwan', 'Agus', 'Budi', 'Slamet', 'Rahmat', 'Joko', 'Wawan', 'Hendra', 'Dadang', 'Ade', 'Sutrisno', 'Eko', 'Nana', 'Endang', 'Rudi', 'Komang', 'Made', 'Toto', 'Herman', 'Imam', 'Dodi', 'Sapri', 'Udin', 'Engkos', 'Jajang', 'Tatang', 'Ridwan', 'Suherman', 'Wahyu', 'Bambang', 'Teguh', 'Sugeng', 'Mamat', 'Usep', 'Aris', 'Fajar', 'Gilang', 'Irfan', 'Yusuf', 'Ketut', 'Wayan', 'Andri', 'Darto', 'Sarip', 'Ojak']
@@ -195,10 +197,10 @@ export const PROJECTS = [
       { item: 'Pembersihan & buang puing', vol: '1 ls', price: 4_000_000 },
     ],
     updates: [
-      { date: '11 Nov', text: 'Kabinet bawah terpasang, menunggu top granit.', by: 'Mandor Dadang', photos: ['kayu', 'kayu', 'bangunan'] },
-      { date: '8 Nov', text: 'Keramik lantai selesai, nat dikeringkan 24 jam.', by: 'Mandor Dadang', photos: ['bangunan', 'bangunan'] },
-      { date: '5 Nov', text: 'Instalasi pipa dan listrik baru di dinding dapur.', by: 'Mandor Dadang', photos: ['ledeng', 'listrik', 'listrik'] },
-      { date: '3 Nov', text: 'Pembongkaran selesai, puing diangkut.', by: 'Mandor Dadang', photos: ['bangunan'] },
+      { date: '11 Nov', text: 'Kabinet bawah terpasang, menunggu top granit.', by: 'Mandor Dadang', photos: PROGRESS_PHOTOS.kabinet },
+      { date: '8 Nov', text: 'Keramik lantai selesai, nat dikeringkan 24 jam.', by: 'Mandor Dadang', photos: PROGRESS_PHOTOS.keramik },
+      { date: '5 Nov', text: 'Instalasi pipa dan listrik baru di dinding dapur.', by: 'Mandor Dadang', photos: [...PROGRESS_PHOTOS.pipa, ...PROGRESS_PHOTOS.listrik] },
+      { date: '3 Nov', text: 'Pembongkaran selesai, puing diangkut.', by: 'Mandor Dadang', photos: PROGRESS_PHOTOS.bongkar },
     ],
   },
   {
@@ -228,11 +230,4 @@ export const RAB_OFFERS = [
 
 export const STATS = { tukang: TUKANG.length, mitra: MITRA.length, kota: CITIES.length, ulasan: TUKANG.reduce((s, t) => s + t.reviews, 0) }
 
-// ---------- Foto realistis (AI, fiktif) untuk sebagian tukang; sisanya ilustrasi ----------
-const IMG = (f) => `${import.meta.env.BASE_URL}img/${f}`
-const topIn = (cat) => TUKANG.filter((t) => t.category === cat && (t.city === 'Bandung' || t.city === 'Cimahi')).sort((a, b) => b.rating - a.rating)[0]
-;[['bangunan', 'p01.png'], ['listrik', 'p02.png'], ['kayu', 'p03.png']].forEach(([c, f]) => { const t = topIn(c); if (t) { t.photo = IMG(f); t.readySoon = true } })
-const kayuTop = topIn('kayu')
-if (kayuTop) { kayuTop.portfolio = ['Kitchen set HPL', ...kayuTop.portfolio.filter((p) => p !== 'Kitchen set HPL')].slice(0, 6) }
-export const PORTFOLIO_PHOTOS = { 'Kitchen set HPL': IMG('w-kayu-1.png') }
-export const HERO_PHOTO = IMG('w-kayu-1.png')
+assignTukangPhotos(TUKANG)
